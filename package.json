@@ -1,0 +1,12 @@
+{
+  "name": "claw-init",
+  "version": "1.0.0",
+  "description": "Project scaffolder for agents",
+  "main": "index.js",
+  "bin": {
+    "claw-init": "./index.js"
+  },
+  "keywords": ["scaffold", "init", "template", "agent", "skill"],
+  "author": "Julian Thorne",
+  "license": "MIT"
+}
