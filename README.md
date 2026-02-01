@@ -5,7 +5,7 @@ Project scaffolder. Creates boilerplate for new projects.
 ## Usage
 
 ```bash
-claw-init <template> <name>
+claw-init <template> <name> [options]
 ```
 
 ## Templates
@@ -19,12 +19,27 @@ Node.js CLI tool with argument parsing
 ### static
 Static site generator with build script
 
-## Example
+## Options
 
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--description` | `-d` | Project description |
+| `--author` | `-a` | Author name |
+| `--github` | `-g` | GitHub username |
+
+## Examples
+
+### Interactive mode
 ```bash
 claw-init skill my-new-skill
 # Answer prompts for description, author, github
 # Creates my-new-skill/ with all files
+```
+
+### Non-interactive mode (for automation)
+```bash
+claw-init cli my-tool -d "A CLI tool" -a "Julian" -g "julianthorne2jz"
+claw-init skill my-skill --description "My skill" --author "Julian" --github "julianthorne2jz"
 ```
 
 ## License

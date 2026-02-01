@@ -5,6 +5,27 @@ const readline = require('readline');
 
 const args = process.argv.slice(2);
 
+// Parse flags
+function parseFlags(args) {
+    const flags = {};
+    const positional = [];
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if (arg.startsWith('--')) {
+            const key = arg.slice(2);
+            flags[key] = args[++i] || '';
+        } else if (arg.startsWith('-')) {
+            const key = arg.slice(1);
+            flags[key] = args[++i] || '';
+        } else {
+            positional.push(arg);
+        }
+    }
+    return { flags, positional };
+}
+
+const { flags, positional } = parseFlags(args);
+
 const templates = {
     skill: {
         files: {
@@ -220,11 +241,12 @@ async function init(type, name) {
         process.exit(1);
     }
 
+    // Use flags if provided, otherwise prompt interactively
     const vars = {
         name,
-        description: await prompt('Description: '),
-        author: await prompt('Author: '),
-        github: await prompt('GitHub username: ')
+        description: flags.description || flags.d || (process.stdin.isTTY ? await prompt('Description: ') : 'A new project'),
+        author: flags.author || flags.a || (process.stdin.isTTY ? await prompt('Author: ') : 'Unknown'),
+        github: flags.github || flags.g || (process.stdin.isTTY ? await prompt('GitHub username: ') : 'username')
     };
 
     fs.mkdirSync(dir, { recursive: true });
@@ -239,22 +261,28 @@ async function init(type, name) {
     console.log(`   cd ${name} && npm install`);
 }
 
-if (args[0] === 'help' || !args[0]) {
+if (positional[0] === 'help' || !positional[0]) {
     console.log(`claw-init - Project scaffolder
 
 Usage:
-  claw-init <template> <name>
+  claw-init <template> <name> [options]
 
 Templates:
   skill    OpenClaw skill with SKILL.md
   cli      Node.js CLI tool
   static   Static site generator
 
+Options:
+  -d, --description <text>   Project description
+  -a, --author <name>        Author name
+  -g, --github <username>    GitHub username
+
 Example:
   claw-init skill my-skill
+  claw-init cli my-tool -d "A CLI tool" -a "Julian" -g "julianthorne2jz"
 `);
 } else {
-    const [type, name] = args;
+    const [type, name] = positional;
     if (!name) {
         console.error('Usage: claw-init <template> <name>');
         process.exit(1);
