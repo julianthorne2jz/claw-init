@@ -215,6 +215,173 @@ npm run build
 MIT
 `
         }
+    },
+    api: {
+        files: {
+            'index.js': `#!/usr/bin/env node
+// {{name}} - {{description}}
+
+const http = require('http');
+
+const PORT = process.env.PORT || 3000;
+
+const routes = {
+    'GET /': (req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ name: '{{name}}', status: 'running' }));
+    },
+    'GET /health': (req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+    }
+};
+
+const server = http.createServer((req, res) => {
+    const key = \`\${req.method} \${req.url.split('?')[0]}\`;
+    const handler = routes[key];
+    
+    if (handler) {
+        handler(req, res);
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Not found' }));
+    }
+});
+
+server.listen(PORT, () => {
+    console.log(\`🚀 {{name}} running on http://localhost:\${PORT}\`);
+});
+`,
+            'package.json': `{
+  "name": "{{name}}",
+  "version": "1.0.0",
+  "description": "{{description}}",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "author": "{{author}}",
+  "license": "MIT"
+}
+`,
+            'README.md': `# {{name}}
+
+{{description}}
+
+## Quick Start
+
+\`\`\`bash
+npm start
+\`\`\`
+
+## Endpoints
+
+| Method | Path     | Description       |
+|--------|----------|-------------------|
+| GET    | /        | API info          |
+| GET    | /health  | Health check      |
+
+## Environment
+
+- \`PORT\` - Server port (default: 3000)
+
+## License
+
+MIT
+`,
+            '.env.example': `PORT=3000
+`
+        }
+    },
+    lib: {
+        files: {
+            'index.js': `// {{name}} - {{description}}
+
+/**
+ * Example function
+ * @param {string} input - Input string
+ * @returns {string} Processed output
+ */
+function example(input) {
+    return \`Hello, \${input}!\`;
+}
+
+module.exports = { example };
+`,
+            'index.d.ts': `/**
+ * Example function
+ */
+export function example(input: string): string;
+`,
+            'package.json': `{
+  "name": "{{name}}",
+  "version": "1.0.0",
+  "description": "{{description}}",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts"],
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [],
+  "author": "{{author}}",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/{{github}}/{{name}}.git"
+  }
+}
+`,
+            'test.js': `const { example } = require('./index');
+
+// Simple test runner
+const tests = [
+    { name: 'example returns greeting', fn: () => example('World') === 'Hello, World!' }
+];
+
+let passed = 0;
+for (const test of tests) {
+    if (test.fn()) {
+        console.log('✅', test.name);
+        passed++;
+    } else {
+        console.log('❌', test.name);
+    }
+}
+console.log(\`\\n\${passed}/\${tests.length} tests passed\`);
+process.exit(passed === tests.length ? 0 : 1);
+`,
+            'README.md': `# {{name}}
+
+{{description}}
+
+## Install
+
+\`\`\`bash
+npm install {{name}}
+\`\`\`
+
+## Usage
+
+\`\`\`javascript
+const { example } = require('{{name}}');
+
+console.log(example('World')); // Hello, World!
+\`\`\`
+
+## API
+
+### \`example(input)\`
+
+- **input** \`string\` - Input string
+- **Returns** \`string\` - Processed output
+
+## License
+
+MIT
+`
+        }
     }
 };
 
@@ -271,6 +438,8 @@ Templates:
   skill    OpenClaw skill with SKILL.md
   cli      Node.js CLI tool
   static   Static site generator
+  api      REST API server (zero deps)
+  lib      Publishable npm library
 
 Options:
   -d, --description <text>   Project description
