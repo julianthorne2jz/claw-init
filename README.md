@@ -1,5 +1,16 @@
 # claw-init
 
+## Install
+
+```bash
+git clone https://github.com/julianthorne2jz/claw-init
+cd claw-init
+npm link
+```
+
+Now you can use `claw-init` from anywhere.
+
+
 Project scaffolder. Creates boilerplate for new projects.
 
 ## Usage
