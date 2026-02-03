@@ -424,8 +424,32 @@ async function init(type, name) {
         console.log(`  Created: ${file}`);
     }
 
+    // Make index.js executable if it exists
+    const indexPath = path.join(dir, 'index.js');
+    if (fs.existsSync(indexPath)) {
+        fs.chmodSync(indexPath, '755');
+    }
+
     console.log(`\n✅ Created ${type} project: ${name}/`);
-    console.log(`   cd ${name} && npm install`);
+
+    // If --push flag, initialize git and push to GitHub
+    if (flags.push || flags.p) {
+        const { execSync } = require('child_process');
+        const github = vars.github || 'julianthorne2jz';
+        
+        console.log('\n📦 Initializing git and pushing to GitHub...');
+        try {
+            execSync('git init', { cwd: dir, stdio: 'inherit' });
+            execSync('git add -A', { cwd: dir, stdio: 'inherit' });
+            execSync(`git commit -m "feat: initial ${name}"`, { cwd: dir, stdio: 'inherit' });
+            execSync(`gh repo create ${github}/${name} --public --source=. --push --description "${vars.description}"`, { cwd: dir, stdio: 'inherit' });
+            console.log(`\n🚀 Pushed to github.com/${github}/${name}`);
+        } catch (e) {
+            console.error('❌ Git/GitHub error:', e.message);
+        }
+    } else {
+        console.log(`   cd ${name} && npm install`);
+    }
 }
 
 if (positional[0] === 'help' || !positional[0]) {
@@ -444,11 +468,13 @@ Templates:
 Options:
   -d, --description <text>   Project description
   -a, --author <name>        Author name
-  -g, --github <username>    GitHub username
+  -g, --github <username>    GitHub username (default: julianthorne2jz)
+  -p, --push                 Initialize git and push to GitHub
 
 Example:
   claw-init skill my-skill
-  claw-init cli my-tool -d "A CLI tool" -a "Julian" -g "julianthorne2jz"
+  claw-init cli claw-foo -d "A CLI tool" --push
+  claw-init cli my-tool -d "A CLI tool" -a "Julian" -g "julianthorne2jz" --push
 `);
 } else {
     const [type, name] = positional;
